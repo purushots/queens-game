@@ -353,3 +353,211 @@ button:focus-visible {
     width: 100px;
   }
 }
+
+/* === Board Selection Cards === */
+.board-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 1px 3px var(--color-shadow);
+  transition: box-shadow var(--transition);
+}
+
+.board-card:hover {
+  box-shadow: 0 4px 12px var(--color-shadow);
+}
+
+.board-card-preview {
+  flex-shrink: 0;
+}
+
+.mini-grid {
+  display: grid;
+  width: 80px;
+  height: 80px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.mini-cell {
+  width: 100%;
+  height: 100%;
+}
+
+.board-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.board-card-name {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.board-card-size {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.board-card-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.board-card-actions button {
+  padding: 8px 16px;
+  font-size: 0.9rem;
+}
+
+.btn-delete {
+  color: #b71c1c;
+  border-color: #f5c6cb;
+}
+
+.btn-delete:hover {
+  background-color: #fdecea;
+}
+
+.btn-delete:active {
+  background-color: #f5c6cb;
+}
+
+/* === Player Gameplay === */
+.player-status {
+  text-align: center;
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--color-text);
+  margin-bottom: 12px;
+}
+
+.player-grid-wrapper {
+  position: relative;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.player-grid {
+  display: grid;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  user-select: none;
+  -webkit-user-select: none;
+  border-radius: 4px;
+}
+
+.player-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  transition: filter 60ms ease;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.player-cell:hover {
+  filter: brightness(0.92);
+}
+
+.cell-x {
+  color: rgba(0, 0, 0, 0.4);
+  font-size: clamp(10px, 3vw, 22px);
+  line-height: 1;
+}
+
+.cell-queen {
+  color: #1a1a2e;
+  font-size: clamp(14px, 4vw, 28px);
+  line-height: 1;
+}
+
+.cell-conflict {
+  box-shadow: inset 0 0 0 2px #e53935, 0 0 6px rgba(229, 57, 53, 0.5);
+}
+
+/* === Win Overlay === */
+.player-win-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.88);
+  border-radius: 4px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 300ms ease;
+  z-index: 10;
+}
+
+.player-win-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.win-overlay-content {
+  text-align: center;
+}
+
+.win-overlay-content h3 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--color-text);
+  margin-bottom: 20px;
+}
+
+.win-overlay-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.win-overlay-buttons button {
+  padding: 10px 20px;
+  font-size: 0.95rem;
+}
+
+/* === Reset Button === */
+.player-reset-btn {
+  display: block;
+  margin: 16px auto 0;
+}
+
+/* === Player Mobile === */
+@media (max-width: 768px) {
+  .board-card {
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .mini-grid {
+    width: 60px;
+    height: 60px;
+  }
+
+  .board-card-actions {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .board-card-actions button {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+
+  .player-grid-wrapper {
+    max-width: 100%;
+  }
+}
