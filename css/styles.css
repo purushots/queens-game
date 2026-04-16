@@ -1,0 +1,182 @@
+/* === Reset === */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* === Base === */
+:root {
+  --color-bg: #f8f9fa;
+  --color-surface: #ffffff;
+  --color-text: #1a1a2e;
+  --color-text-muted: #6c757d;
+  --color-primary: #4361ee;
+  --color-primary-hover: #3a56d4;
+  --color-primary-active: #2f47b3;
+  --color-border: #dee2e6;
+  --color-shadow: rgba(0, 0, 0, 0.08);
+  --radius: 8px;
+  --radius-lg: 12px;
+  --transition: 150ms ease;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.5;
+  min-height: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* === App Container === */
+#app {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 24px 16px;
+  min-height: 100vh;
+}
+
+/* === Screen Navigation === */
+.screen {
+  display: none;
+}
+
+.screen.active {
+  display: block;
+}
+
+/* === Home Screen === */
+#screen-home {
+  display: none;
+  text-align: center;
+  padding-top: 20vh;
+}
+
+#screen-home.active {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#screen-home h1 {
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+  color: var(--color-text);
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: var(--color-text-muted);
+  margin-bottom: 48px;
+}
+
+.home-buttons {
+  display: flex;
+  gap: 16px;
+}
+
+/* === Buttons === */
+button {
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  border-radius: var(--radius);
+  padding: 12px 28px;
+  background-color: var(--color-primary);
+  color: #ffffff;
+  transition: background-color var(--transition), transform var(--transition),
+    box-shadow var(--transition);
+  box-shadow: 0 2px 4px var(--color-shadow);
+}
+
+button:hover {
+  background-color: var(--color-primary-hover);
+  box-shadow: 0 4px 8px var(--color-shadow);
+}
+
+button:active {
+  background-color: var(--color-primary-active);
+  transform: scale(0.97);
+  box-shadow: 0 1px 2px var(--color-shadow);
+}
+
+button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* === Screen Header === */
+.screen-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.screen-header h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+/* === Back Button === */
+.btn-back {
+  background: none;
+  color: var(--color-primary);
+  padding: 6px 10px;
+  font-size: 1rem;
+  font-weight: 500;
+  box-shadow: none;
+  border-radius: var(--radius);
+}
+
+.btn-back:hover {
+  background-color: rgba(67, 97, 238, 0.08);
+  box-shadow: none;
+}
+
+.btn-back:active {
+  background-color: rgba(67, 97, 238, 0.15);
+  transform: none;
+  box-shadow: none;
+}
+
+/* === Board List === */
+#board-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+#board-list p {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: 48px 0;
+}
+
+/* === Containers === */
+#designer-container,
+#player-container {
+  margin-top: 8px;
+}
+
+#designer-container p,
+#player-container p {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: 48px 0;
+}
