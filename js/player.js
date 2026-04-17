@@ -418,13 +418,9 @@ export class Player {
     const overlay = document.getElementById('player-win-overlay');
     if (overlay) overlay.classList.remove('visible');
 
-    // Re-render cells and borders
+    // Re-render cells and borders (grid element persists, event delegation still works)
     this._renderCells();
     this._updateBorders();
-
-    // Re-bind events since _renderCells replaces DOM
-    const grid = document.getElementById('player-grid');
-    this._bindGridEvents(grid);
 
     // Update status
     const status = document.getElementById('player-status');

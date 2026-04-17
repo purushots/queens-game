@@ -39,7 +39,7 @@ body {
 
 /* === App Container === */
 #app {
-  max-width: 600px;
+  max-width: 800px;
   margin: 0 auto;
   padding: 24px 16px;
   min-height: 100vh;
@@ -283,6 +283,7 @@ button:focus-visible {
   -webkit-user-select: none;
   cursor: pointer;
   border-radius: 4px;
+  touch-action: manipulation;
 }
 
 .designer-cell {
@@ -323,6 +324,18 @@ button:focus-visible {
   border-color: var(--color-text);
   box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-text);
   transform: scale(1.1);
+}
+
+/* When palette has many swatches (12+), use a 2-column grid */
+.designer-palette.palette-compact {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.designer-palette.palette-compact .designer-swatch {
+  width: 32px;
+  height: 32px;
 }
 
 /* Mobile layout */
@@ -453,6 +466,7 @@ button:focus-visible {
   user-select: none;
   -webkit-user-select: none;
   border-radius: 4px;
+  touch-action: manipulation;
 }
 
 .player-cell {

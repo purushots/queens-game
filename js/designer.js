@@ -286,6 +286,13 @@ export class Designer {
     const palette = document.getElementById('designer-palette');
     palette.innerHTML = '';
 
+    // Use compact layout when there are many swatches
+    if (this.size >= 12) {
+      palette.classList.add('palette-compact');
+    } else {
+      palette.classList.remove('palette-compact');
+    }
+
     for (let i = 0; i < this.size; i++) {
       const swatch = document.createElement('div');
       swatch.className = 'designer-swatch';
