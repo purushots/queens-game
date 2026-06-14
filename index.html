@@ -2,51 +2,95 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Queens</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♛</text></svg>">
-  <link rel="stylesheet" href="css/styles.css">
+  <meta name="description" content="Queens — a LinkedIn-style logic puzzle. 500 shared levels, fully offline.">
+  <meta name="theme-color" content="#4361EE">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Queens">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+  <link rel="stylesheet" href="./css/styles.css">
 </head>
 <body>
-  <div id="app">
-    <!-- Home Screen -->
-    <div id="screen-home" class="screen active">
-      <h1>Queens</h1>
-      <p class="subtitle">Create and solve your own puzzles</p>
-      <div class="home-buttons">
-        <button id="btn-new-board">Create Board</button>
-        <button id="btn-play">Play</button>
+  <header class="header">
+    <div class="header-inner">
+      <div class="brand">
+        <span class="wordmark">Queens</span>
+        <button type="button" class="level-chip" id="levelChip" aria-haspopup="dialog" aria-label="Choose level">#1</button>
+      </div>
+      <div class="count" id="count" aria-label="Queens placed">0 / 0</div>
+    </div>
+  </header>
+
+  <main class="app">
+    <div class="board-wrap">
+      <div class="board" id="board" aria-label="Queens board"></div>
+
+      <!-- Win overlay -->
+      <div class="win-overlay" id="winOverlay" hidden>
+        <div class="win-content">
+          <h2 id="winTitle">Solved!</h2>
+          <p class="win-sub" id="winSub"></p>
+          <button type="button" class="primary" id="nextLevelBtn">Next level</button>
+        </div>
       </div>
     </div>
 
-    <!-- Designer Screen -->
-    <div id="screen-designer" class="screen">
-      <div class="screen-header">
-        <button class="btn-back" data-target="home">&#8592; Back</button>
-        <h2>Board Designer</h2>
-      </div>
-      <div id="designer-container"></div>
+    <p class="message" id="message" aria-live="polite"></p>
+
+    <div class="actions">
+      <button type="button" class="pill" id="clearBtn">Clear</button>
+      <button type="button" class="pill" id="levelsBtn">Levels</button>
     </div>
 
-    <!-- Player Select Screen -->
-    <div id="screen-select" class="screen">
-      <div class="screen-header">
-        <button class="btn-back" data-target="home">&#8592; Back</button>
-        <h2>Select Board</h2>
-      </div>
-      <div id="board-list"></div>
-    </div>
+    <button type="button" class="how-link" id="howBtn">How to play</button>
+  </main>
 
-    <!-- Player Game Screen -->
-    <div id="screen-player" class="screen">
-      <div class="screen-header">
-        <button class="btn-back" data-target="select">&#8592; Back</button>
-        <h2 id="player-board-name"></h2>
-      </div>
-      <div id="player-container"></div>
+  <!-- How to play -->
+  <div class="overlay" id="rulesOverlay" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+      <h2 id="rulesTitle">How to play</h2>
+      <p class="rules-goal">Place one crown in every row, column, and colour region.</p>
+      <ul class="rules-list">
+        <li>Exactly one <strong>&#9819;</strong> per row, per column, and per colour region.</li>
+        <li>Crowns may never touch — not even diagonally.</li>
+        <li>Tap a cell once to mark it <strong>&#10005;</strong> (can't be a crown), tap again to clear.</li>
+        <li>Double-tap a cell to place or remove a crown.</li>
+      </ul>
+      <p class="rules-tip">Every level has one solution you can reach with logic alone — no guessing.</p>
+      <button type="button" class="primary" id="rulesCloseBtn">Got it</button>
     </div>
   </div>
 
-  <script src="js/app.js"></script>
+  <!-- Level selector -->
+  <div class="overlay" id="levelsOverlay" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="levelsTitle">
+      <h2 id="levelsTitle">Levels</h2>
+      <div class="levels-grid" id="levelsGrid"></div>
+      <button type="button" class="primary" id="levelsCloseBtn">Close</button>
+    </div>
+  </div>
+
+  <script src="./js/queens-engine.js"></script>
+  <script src="./js/puzzles.js"></script>
+  <script src="./js/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      // Auto-reload once when a new worker takes control, so updates land
+      // without a manual hard refresh.
+      var hadController = !!navigator.serviceWorker.controller;
+      var reloading = false;
+      navigator.serviceWorker.addEventListener('controllerchange', function () {
+        if (hadController && !reloading) { reloading = true; location.reload(); }
+      });
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('./sw.js').catch(function () {});
+      });
+    }
+  </script>
 </body>
 </html>

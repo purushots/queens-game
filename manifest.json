@@ -1,0 +1,14 @@
+{
+  "name": "Queens",
+  "short_name": "Queens",
+  "description": "A LinkedIn-style logic puzzle — 500 shared levels, fully offline.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F8F9FA",
+  "theme_color": "#4361EE",
+  "icons": [
+    { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
