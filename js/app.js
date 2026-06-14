@@ -272,7 +272,6 @@
         btn.dataset.row = r;
         btn.dataset.col = c;
         btn.style.backgroundColor = COLORS[state.grid[r][c] % COLORS.length];
-        btn.addEventListener('click', () => onTap(r, c));
         boardEl.appendChild(btn);
         cells.push(btn);
       }
@@ -329,13 +328,16 @@
     clearBtn.disabled = state.won;
   }
 
-  // ---------- Input (single-tap cycle: empty → ✕ → ♛ → empty) ----------
+  // ---------- Input: tap cycles a cell; drag paints ✕ (LinkedIn-style) ----------
+  let painting = false, dragMoved = false, pressCell = null, paintMode = 'add', dragSnap = null;
+
   function pushUndo() {
     state.undo.push(cloneCellStates());
     if (state.undo.length > UNDO_LIMIT) state.undo.shift();
   }
 
-  function onTap(r, c) {
+  // Single tap: empty → ✕ → ♛ → empty.
+  function tapCycle(r, c) {
     if (state.won) return;
     clearHint();
     pushUndo();
@@ -344,15 +346,71 @@
       state.cellStates[r][c] = 'empty';
     } else if (cur === 'x') {
       state.cellStates[r][c] = 'queen';
-    } else { // empty
+    } else {
       // With auto-✕ on, an already-eliminated empty cell skips the redundant ✕.
       const eliminated = settings.autoX && eliminatedSet().has(r + ',' + c);
       state.cellStates[r][c] = eliminated ? 'queen' : 'x';
     }
     deriveQueens();
-    renderAll();        // crown changes shift the auto-✕ overlay
+    renderAll();
     updateButtons();
     runValidation();
+  }
+
+  // During a drag: paint ✕ (or erase if the drag began on a ✕). Never touch crowns.
+  function paintX(r, c) {
+    if (state.cellStates[r][c] === 'queen') return;
+    state.cellStates[r][c] = (paintMode === 'erase') ? 'empty' : 'x';
+    renderCell(r, c);
+  }
+
+  function cellFromPoint(x, y) {
+    const el = document.elementFromPoint(x, y);
+    const cell = el && el.closest ? el.closest('.cell') : null;
+    if (!cell || cell.parentElement !== boardEl) return null;
+    return { r: +cell.dataset.row, c: +cell.dataset.col };
+  }
+
+  function onPointerDown(e) {
+    if (state.won) return;
+    const cell = cellFromPoint(e.clientX, e.clientY);
+    if (!cell) return;
+    e.preventDefault();
+    painting = true;
+    dragMoved = false;
+    pressCell = cell;
+    paintMode = (state.cellStates[cell.r][cell.c] === 'x') ? 'erase' : 'add';
+    dragSnap = cloneCellStates();
+  }
+
+  function onPointerMove(e) {
+    if (!painting) return;
+    const cell = cellFromPoint(e.clientX, e.clientY);
+    if (!cell) return;
+    if (!dragMoved && cell.r === pressCell.r && cell.c === pressCell.c) return;
+    e.preventDefault();
+    if (!dragMoved) {            // a real drag has started
+      dragMoved = true;
+      clearHint();
+      state.undo.push(dragSnap); // one undo entry for the whole stroke
+      if (state.undo.length > UNDO_LIMIT) state.undo.shift();
+      paintX(pressCell.r, pressCell.c);
+    }
+    paintX(cell.r, cell.c);
+  }
+
+  function endPointer() {
+    if (!painting) return;
+    painting = false;
+    if (!dragMoved) {
+      tapCycle(pressCell.r, pressCell.c);
+    } else {
+      deriveQueens();
+      renderAll();
+      updateButtons();
+      runValidation();
+    }
+    pressCell = null;
   }
 
   function onUndo() {
@@ -446,6 +504,11 @@
     '<path d="M5.5 7V5.2a2.5 2.5 0 0 1 5 0V7"/></svg>';
 
   // ---------- Wiring ----------
+  boardEl.addEventListener('pointerdown', onPointerDown);
+  boardEl.addEventListener('pointermove', onPointerMove);
+  document.addEventListener('pointerup', endPointer);
+  document.addEventListener('pointercancel', endPointer);
+  boardEl.addEventListener('contextmenu', (e) => e.preventDefault());
   undoBtn.addEventListener('click', onUndo);
   hintBtn.addEventListener('click', onHint);
   clearBtn.addEventListener('click', onClear);
@@ -488,7 +551,8 @@
     getState: () => state,
     getSettings: () => settings,
     getLevel: () => state.level,
-    tap: (r, c) => onTap(r, c),
+    tap: (r, c) => tapCycle(r, c),
+    paintX: (r, c, mode) => { paintMode = mode || 'add'; paintX(r, c); deriveQueens(); renderAll(); runValidation(); },
     hint: onHint,
     undo: onUndo,
     solve: () => {
