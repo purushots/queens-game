@@ -120,3 +120,32 @@ test('countSolutions: detects an ambiguous board (2 solutions)', () => {
   // so this counts non-touching permutations (should be >= 2).
   assert.ok(engine.countSolutions(grid, 2) >= 2, 'uniform-by-row board is ambiguous');
 });
+
+test('hint: points to a forced crown, flags wrong crowns, null when solved', () => {
+  const p = engine.generatePuzzle(mulberry32(7), 8);
+  const N = p.size;
+  const sol = p.solution;
+  const queensFrom = (rows) => rows.map((r) => ({ row: r, col: sol[r] }));
+
+  // Empty board: hint points to a 'place' cell that matches the solution.
+  const h0 = engine.hint(p.grid, [], sol);
+  assert.equal(h0.kind, 'place', 'empty board → place hint');
+  assert.equal(sol[h0.cell[0]], h0.cell[1], 'hint cell is the solution crown for its row');
+  assert.ok(typeof h0.reason === 'string' && h0.reason.length > 0, 'hint has a reason');
+
+  // All-but-one correct: hint points at the missing one.
+  const allButLast = queensFrom([...Array(N - 1).keys()]); // rows 0..N-2
+  const h1 = engine.hint(p.grid, allButLast, sol);
+  assert.equal(h1.kind, 'place', 'near-complete → place');
+  assert.deepEqual(h1.cell, [N - 1, sol[N - 1]], 'points at the last crown');
+
+  // A wrong crown is flagged.
+  const wrongCol = (sol[0] + 2) % N;
+  const h2 = engine.hint(p.grid, [{ row: 0, col: wrongCol }], sol);
+  assert.equal(h2.kind, 'wrong', 'wrong crown flagged');
+  assert.deepEqual(h2.cell, [0, wrongCol], 'flags the wrong cell');
+
+  // Fully solved: null.
+  const full = queensFrom([...Array(N).keys()]);
+  assert.equal(engine.hint(p.grid, full, sol), null, 'solved → null');
+});

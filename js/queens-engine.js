@@ -311,12 +311,116 @@
     throw new Error('failed to generate a unique, logic-solvable puzzle for N=' + N);
   }
 
+  // --- Hint -------------------------------------------------------------------
+  // Given the current crowns, returns the next help:
+  //   { kind:'wrong', cell:[r,c], reason } — a placed crown that can't stay,
+  //   { kind:'place', cell:[r,c], reason } — the next logically-forced crown,
+  //   null — already solved.
+  // Manual X marks are ignored (they're the player's notes, not facts).
+  function hint(grid, queens, solution) {
+    const N = grid.length;
+    const q = queens || [];
+
+    // 1. A crown that clashes, or that can't be part of the unique solution.
+    for (let i = 0; i < q.length; i++) {
+      for (let j = i + 1; j < q.length; j++) {
+        const a = q[i], b = q[j];
+        if (a.row === b.row || a.col === b.col ||
+            grid[a.row][a.col] === grid[b.row][b.col] ||
+            (Math.abs(a.row - b.row) <= 1 && Math.abs(a.col - b.col) <= 1)) {
+          let bad = a;
+          if (solution) bad = (solution[a.row] !== a.col) ? a : (solution[b.row] !== b.col ? b : a);
+          return { kind: 'wrong', cell: [bad.row, bad.col], reason: 'This crown clashes with another — remove it.' };
+        }
+      }
+    }
+    if (solution) {
+      for (const Q of q) {
+        if (solution[Q.row] !== Q.col) {
+          return { kind: 'wrong', cell: [Q.row, Q.col], reason: "This crown can't be part of the solution — remove it." };
+        }
+      }
+    }
+
+    // 2. Next forced crown, deduced from the current crowns.
+    const cand = Array.from({ length: N }, () => new Array(N).fill(true));
+    const rowDone = new Array(N).fill(false);
+    const colDone = new Array(N).fill(false);
+    const regDone = new Array(N).fill(false);
+    const regionCells = Array.from({ length: N }, () => []);
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) regionCells[grid[r][c]].push([r, c]);
+
+    function elim(r, c) {
+      for (let k = 0; k < N; k++) { cand[r][k] = false; cand[k][c] = false; }
+      for (const [rr, cc] of regionCells[grid[r][c]]) cand[rr][cc] = false;
+      for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+        const nr = r + dr, nc = c + dc;
+        if (nr >= 0 && nr < N && nc >= 0 && nc < N) cand[nr][nc] = false;
+      }
+    }
+    for (const Q of q) { rowDone[Q.row] = colDone[Q.col] = regDone[grid[Q.row][Q.col]] = true; elim(Q.row, Q.col); }
+
+    const rowCands = (r) => { const o = []; for (let c = 0; c < N; c++) if (cand[r][c]) o.push(c); return o; };
+    const colCands = (c) => { const o = []; for (let r = 0; r < N; r++) if (cand[r][c]) o.push(r); return o; };
+    const regCands = (g) => regionCells[g].filter(([r, c]) => cand[r][c]);
+
+    for (let guard = 0; guard < N * N; guard++) {
+      for (let g = 0; g < N; g++) {
+        if (regDone[g]) continue;
+        const cs = regCands(g);
+        if (cs.length === 1) return { kind: 'place', cell: cs[0], reason: 'Only one square is left in this colour region — its crown goes here.' };
+      }
+      for (let r = 0; r < N; r++) {
+        if (rowDone[r]) continue;
+        const cs = rowCands(r);
+        if (cs.length === 1) return { kind: 'place', cell: [r, cs[0]], reason: 'Only one square is left in this row — a crown goes here.' };
+      }
+      for (let c = 0; c < N; c++) {
+        if (colDone[c]) continue;
+        const rs = colCands(c);
+        if (rs.length === 1) return { kind: 'place', cell: [rs[0], c], reason: 'Only one square is left in this column — a crown goes here.' };
+      }
+      let progress = false;
+      for (let g = 0; g < N; g++) {
+        if (regDone[g]) continue;
+        const cells = regCands(g);
+        const rows = new Set(cells.map((x) => x[0]));
+        const cols = new Set(cells.map((x) => x[1]));
+        if (rows.size === 1) { const r = cells[0][0]; for (let c = 0; c < N; c++) if (cand[r][c] && grid[r][c] !== g) { cand[r][c] = false; progress = true; } }
+        if (cols.size === 1) { const c = cells[0][1]; for (let r = 0; r < N; r++) if (cand[r][c] && grid[r][c] !== g) { cand[r][c] = false; progress = true; } }
+      }
+      for (let r = 0; r < N; r++) {
+        if (rowDone[r]) continue;
+        const cs = rowCands(r);
+        if (new Set(cs.map((c) => grid[r][c])).size === 1 && cs.length) {
+          const g = grid[r][cs[0]];
+          for (const [rr, cc] of regionCells[g]) if (cand[rr][cc] && rr !== r) { cand[rr][cc] = false; progress = true; }
+        }
+      }
+      for (let c = 0; c < N; c++) {
+        if (colDone[c]) continue;
+        const rs = colCands(c);
+        if (new Set(rs.map((r) => grid[r][c])).size === 1 && rs.length) {
+          const g = grid[rs[0]][c];
+          for (const [rr, cc] of regionCells[g]) if (cand[rr][cc] && cc !== c) { cand[rr][cc] = false; progress = true; }
+        }
+      }
+      if (!progress) break;
+    }
+
+    if (solution) {
+      for (let r = 0; r < N; r++) if (!rowDone[r]) return { kind: 'place', cell: [r, solution[r]], reason: 'Try this region next.' };
+    }
+    return null;
+  }
+
   const QueensEngine = {
     generateSolution,
     buildRegions,
     generatePuzzle,
     countSolutions,
     logicSolve,
+    hint,
   };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = QueensEngine;

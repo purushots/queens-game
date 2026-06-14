@@ -4,7 +4,7 @@
  * offline. */
 'use strict';
 
-const CACHE = 'queens-v1';
+const CACHE = 'queens-v2';
 const ASSETS = [
   './',
   './index.html',

@@ -54,9 +54,27 @@ Campaign player: load level from the pack, render regions + crowns, tap = mark
 New `sw.js` (network-first, `queens-v1`), `manifest.json`, gold-crown icons
 (`scripts/make_icons.py`), and an auto-reload-on-update hook in `index.html`.
 
+## LinkedIn parity features (added after the campaign)
+
+Brought the app to LinkedIn Queens feature parity (minus the daily model):
+
+- **Single-tap cycle** — tap cycles empty → ✕ → ♛ → empty (was single/double-tap).
+- **Hint** — `QueensEngine.hint()` flags a wrong/clashing crown, else points to the
+  next logically-forced crown with a one-line reason (deduction-based).
+- **Undo** — snapshot-based stack of board states.
+- **Timer** — header clock; pauses when hidden or an overlay is open; shown on win.
+- **Settings** — gear menu with two toggles, persisted in `queens.settings`:
+  - **Auto-place ✕** (default off) — placing a ♛ marks the cells it rules out
+    (row, column, region, touching) as a derived overlay; an already-eliminated
+    empty cell skips the redundant ✕ on tap.
+  - **Auto-check** (default on) — highlight rule-breaking crowns.
+
+Skipped (daily-bound): streak, share. `LEVEL_KEY` is persisted inside
+`startLevel` so resume/advance stay consistent.
+
 ## Verification
 
-- `tests/queens-engine.test.js` — generator/solver correctness across N=7–11.
+- `tests/queens-engine.test.js` — generator/solver/hint correctness across N=7–11.
 - `tests/queens-campaign.test.js` — all 500 shipped levels: valid regions,
   unique, logic-solvable, balanced sizes, distinct.
 - Browser (Playwright): render, tap/double-tap, solve→win, advance unlocks next,

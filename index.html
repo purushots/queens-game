@@ -22,7 +22,21 @@
         <span class="wordmark">Queens</span>
         <button type="button" class="level-chip" id="levelChip" aria-haspopup="dialog" aria-label="Choose level">#1</button>
       </div>
-      <div class="count" id="count" aria-label="Queens placed">0 / 0</div>
+      <div class="header-right">
+        <div class="timer" aria-label="Elapsed time">
+          <svg class="glyph" viewBox="0 0 16 16" aria-hidden="true">
+            <circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M8 4.8V8l2.3 1.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span id="timer">0:00</span>
+        </div>
+        <button type="button" class="icon-btn" id="settingsBtn" aria-haspopup="dialog" aria-label="Settings">
+          <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -34,6 +48,7 @@
       <div class="win-overlay" id="winOverlay" hidden>
         <div class="win-content">
           <h2 id="winTitle">Solved!</h2>
+          <p class="win-time" id="winTime"></p>
           <p class="win-sub" id="winSub"></p>
           <button type="button" class="primary" id="nextLevelBtn">Next level</button>
         </div>
@@ -43,8 +58,21 @@
     <p class="message" id="message" aria-live="polite"></p>
 
     <div class="actions">
+      <button type="button" class="pill" id="undoBtn" disabled>
+        <svg class="glyph" viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M5.6 2.6 2.8 5.4l2.8 2.8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M2.8 5.4h6.4a4 4 0 0 1 0 8H6.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Undo
+      </button>
+      <button type="button" class="pill" id="hintBtn">
+        <svg class="glyph" viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M8 1.6a4.6 4.6 0 0 0-2.6 8.4c.5.4.8.9.9 1.5h3.4c.1-.6.4-1.1.9-1.5A4.6 4.6 0 0 0 8 1.6Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M6.5 13.6h3M7 15.2h2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        Hint
+      </button>
       <button type="button" class="pill" id="clearBtn">Clear</button>
-      <button type="button" class="pill" id="levelsBtn">Levels</button>
     </div>
 
     <button type="button" class="how-link" id="howBtn">How to play</button>
@@ -58,11 +86,27 @@
       <ul class="rules-list">
         <li>Exactly one <strong>&#9819;</strong> per row, per column, and per colour region.</li>
         <li>Crowns may never touch — not even diagonally.</li>
-        <li>Tap a cell once to mark it <strong>&#10005;</strong> (can't be a crown), tap again to clear.</li>
-        <li>Double-tap a cell to place or remove a crown.</li>
+        <li>Tap a cell to cycle: <strong>&#10005;</strong> (note: no crown here) → <strong>&#9819;</strong> (crown) → empty.</li>
+        <li>Use <strong>Hint</strong> if you're stuck, <strong>Undo</strong> to step back.</li>
       </ul>
       <p class="rules-tip">Every level has one solution you can reach with logic alone — no guessing.</p>
       <button type="button" class="primary" id="rulesCloseBtn">Got it</button>
+    </div>
+  </div>
+
+  <!-- Settings -->
+  <div class="overlay" id="settingsOverlay" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <h2 id="settingsTitle">Settings</h2>
+      <label class="setting-row">
+        <span class="setting-label">Auto-place ✕<small>Mark ruled-out cells when you place a crown</small></span>
+        <input type="checkbox" id="setAutoX">
+      </label>
+      <label class="setting-row">
+        <span class="setting-label">Auto-check<small>Highlight crowns that break a rule</small></span>
+        <input type="checkbox" id="setAutoCheck">
+      </label>
+      <button type="button" class="primary" id="settingsCloseBtn">Done</button>
     </div>
   </div>
 
@@ -80,8 +124,6 @@
   <script src="./js/app.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
-      // Auto-reload once when a new worker takes control, so updates land
-      // without a manual hard refresh.
       var hadController = !!navigator.serviceWorker.controller;
       var reloading = false;
       navigator.serviceWorker.addEventListener('controllerchange', function () {
